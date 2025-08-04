@@ -6,9 +6,11 @@ local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 
 -- COLORS
-local darkBlue = Color3.fromRGB(10, 20, 40)
+local darkNavyBlue = Color3.fromRGB(10, 20, 40)
 local darkGold = Color3.fromRGB(180, 140, 30)
 local defaultBtnColor = Color3.fromRGB(25, 25, 45)
+local standardBtnColor = Color3.fromRGB(30, 30, 60)
+local whiteText = Color3.fromRGB(255, 255, 255)
 
 -- STATES
 local toggleOpen = false
@@ -18,6 +20,7 @@ local speedBoostOn = false
 local antiLagOn = false
 local frontLoopMode = false
 local loopbringAllActive = false
+local autoUseToolsOn = false
 
 -- GUI
 local gui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
@@ -27,7 +30,7 @@ gui.ResetOnSpawn = false
 local toggle = Instance.new("TextButton", gui)
 toggle.Size = UDim2.new(0, 120, 0, 25)
 toggle.Position = UDim2.new(0, 10, 0, 10)
-toggle.BackgroundColor3 = darkBlue
+toggle.BackgroundColor3 = darkNavyBlue
 toggle.TextColor3 = darkGold
 toggle.Text = "Psycho Loopbring"
 toggle.Font = Enum.Font.GothamBold
@@ -35,9 +38,9 @@ toggle.TextSize = 14
 toggle.BorderSizePixel = 0
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 220, 0, 260)
+frame.Size = UDim2.new(0, 220, 0, 300)
 frame.Position = UDim2.new(0, 10, 0, 45)
-frame.BackgroundColor3 = darkBlue
+frame.BackgroundColor3 = darkNavyBlue
 frame.BorderSizePixel = 0
 frame.Visible = false
 frame.Active = true
@@ -89,8 +92,8 @@ end)
 -- SPEED BOOST
 local speedButton = Instance.new("TextButton", scroll)
 speedButton.Size = UDim2.new(1, 0, 0, 28)
-speedButton.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
-speedButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedButton.BackgroundColor3 = standardBtnColor
+speedButton.TextColor3 = whiteText
 speedButton.Font = Enum.Font.GothamBold
 speedButton.TextSize = 13
 speedButton.Text = "Speed Boost"
@@ -108,7 +111,7 @@ local function applySpeedBoost(state)
 			else
 				humanoid.WalkSpeed = 16
 				humanoid.JumpPower = 50
-				tweenColor(speedButton, Color3.fromRGB(30, 30, 60))
+				tweenColor(speedButton, standardBtnColor)
 			end
 		end
 	end
@@ -119,26 +122,26 @@ speedButton.MouseButton1Click:Connect(function()
 	applySpeedBoost(speedBoostOn)
 end)
 
--- Reapply speed boost automatically when character respawns
 LocalPlayer.CharacterAdded:Connect(function(char)
 	if speedBoostOn then
-		char:WaitForChild("Humanoid", 5)
-		applySpeedBoost(true)
+		local humanoid = char:WaitForChild("Humanoid", 5)
+		if humanoid then
+			applySpeedBoost(true)
+		end
 	end
 end)
 
--- ANTI-LAG
+-- ANTI-LAG SHIELD
 local antiLagButton = Instance.new("TextButton", scroll)
 antiLagButton.Size = UDim2.new(1, 0, 0, 28)
-antiLagButton.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
-antiLagButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+antiLagButton.BackgroundColor3 = standardBtnColor
+antiLagButton.TextColor3 = whiteText
 antiLagButton.Font = Enum.Font.GothamBold
 antiLagButton.TextSize = 13
 antiLagButton.Text = "Anti-Lag Shield"
 antiLagButton.LayoutOrder = 1
 
 local function activateAntiLag()
-	-- Destroy or simplify effects but KEEP avatar colors and lighting intact
 	for _, obj in pairs(LocalPlayer.Character:GetDescendants()) do
 		if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") or obj:IsA("Sound") or obj:IsA("Decal") or obj:IsA("Texture") then
 			obj:Destroy()
@@ -147,19 +150,16 @@ local function activateAntiLag()
 			obj.Material = Enum.Material.SmoothPlastic
 		end
 	end
-
 	for _, v in pairs(workspace:GetDescendants()) do
 		if v:IsA("Explosion") or v:IsA("Fire") or v:IsA("Smoke") or v:IsA("Sparkles") then
 			v:Destroy()
 		end
 	end
-
-	-- No changes to Lighting to keep screen colors and avatar color unchanged
 end
 
 antiLagButton.MouseButton1Click:Connect(function()
 	antiLagOn = not antiLagOn
-	tweenColor(antiLagButton, antiLagOn and darkGold or Color3.fromRGB(30, 30, 60))
+	tweenColor(antiLagButton, antiLagOn and darkGold or standardBtnColor)
 	if antiLagOn then
 		task.spawn(function()
 			while antiLagOn do
@@ -173,8 +173,8 @@ end)
 -- LOOPBRING ALL
 local loopbringAllButton = Instance.new("TextButton", scroll)
 loopbringAllButton.Size = UDim2.new(1, 0, 0, 28)
-loopbringAllButton.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
-loopbringAllButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+loopbringAllButton.BackgroundColor3 = standardBtnColor
+loopbringAllButton.TextColor3 = whiteText
 loopbringAllButton.Font = Enum.Font.GothamBold
 loopbringAllButton.TextSize = 13
 loopbringAllButton.Text = "Loopbring All"
@@ -183,7 +183,7 @@ loopbringAllButton.LayoutOrder = 2
 loopbringAllButton.MouseButton1Click:Connect(function()
 	local state = not loopbringAllActive
 	loopbringAllActive = state
-	tweenColor(loopbringAllButton, state and darkGold or Color3.fromRGB(30, 30, 60))
+	tweenColor(loopbringAllButton, state and darkGold or standardBtnColor)
 	for name, btn in pairs(playerButtons) do
 		if Players:FindFirstChild(name) and name ~= LocalPlayer.Name then
 			loopList[name] = state or nil
@@ -195,8 +195,8 @@ end)
 -- TOGGLE LOOPBRING POSITION
 local loopbringToggleButton = Instance.new("TextButton", scroll)
 loopbringToggleButton.Size = UDim2.new(1, 0, 0, 28)
-loopbringToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 60)
-loopbringToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+loopbringToggleButton.BackgroundColor3 = standardBtnColor
+loopbringToggleButton.TextColor3 = whiteText
 loopbringToggleButton.Font = Enum.Font.GothamBold
 loopbringToggleButton.TextSize = 13
 loopbringToggleButton.Text = "Toggle Loopbring Position"
@@ -204,17 +204,49 @@ loopbringToggleButton.LayoutOrder = 3
 
 loopbringToggleButton.MouseButton1Click:Connect(function()
 	frontLoopMode = not frontLoopMode
-	tweenColor(loopbringToggleButton, frontLoopMode and darkGold or Color3.fromRGB(30, 30, 60))
+	tweenColor(loopbringToggleButton, frontLoopMode and darkGold or standardBtnColor)
 end)
 
--- ADD PLAYER BUTTON
+-- AUTO USE TOOLS BUTTON (MATCHING STYLE)
+local autoUseButton = Instance.new("TextButton", scroll)
+autoUseButton.Size = UDim2.new(1, 0, 0, 28)
+autoUseButton.BackgroundColor3 = standardBtnColor
+autoUseButton.TextColor3 = whiteText
+autoUseButton.Font = Enum.Font.GothamBold
+autoUseButton.TextSize = 13
+autoUseButton.Text = "Auto Use Tools: OFF"
+autoUseButton.LayoutOrder = 4
+
+local function autoUseTools()
+	if not autoUseToolsOn then return end
+	task.spawn(function()
+		for _, tool in ipairs(LocalPlayer.Backpack:GetChildren()) do
+			if tool:IsA("Tool") then
+				tool.Parent = LocalPlayer.Character
+			end
+		end
+		for _, tool in ipairs(LocalPlayer.Character:GetChildren()) do
+			if tool:IsA("Tool") then
+				pcall(function() tool:Activate() end)
+			end
+		end
+	end)
+end
+
+autoUseButton.MouseButton1Click:Connect(function()
+	autoUseToolsOn = not autoUseToolsOn
+	autoUseButton.Text = autoUseToolsOn and "Auto Use Tools: ON" or "Auto Use Tools: OFF"
+	tweenColor(autoUseButton, autoUseToolsOn and darkGold or standardBtnColor)
+end)
+
+-- ADD PLAYER BUTTONS WITH KILL TRACKER
 local function addPlayerButton(targetPlayer)
 	if targetPlayer == LocalPlayer then return end
 
 	local button = Instance.new("TextButton")
 	button.Size = UDim2.new(1, 0, 0, 28)
 	button.BackgroundColor3 = defaultBtnColor
-	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.TextColor3 = whiteText
 	button.Font = Enum.Font.GothamBold
 	button.TextSize = 13
 	button.Text = targetPlayer.Name
@@ -223,6 +255,39 @@ local function addPlayerButton(targetPlayer)
 
 	playerButtons[targetPlayer.Name] = button
 
+	-- Kill tracker label
+	local killLabel = Instance.new("TextLabel", button)
+	killLabel.Size = UDim2.new(0, 60, 1, 0)
+	killLabel.Position = UDim2.new(1, -65, 0, 0)
+	killLabel.BackgroundTransparency = 1
+	killLabel.TextColor3 = Color3.new(1, 0.2, 0.2)
+	killLabel.Font = Enum.Font.GothamBold
+	killLabel.TextSize = 12
+	killLabel.TextXAlignment = Enum.TextXAlignment.Right
+	killLabel.Text = "Kills: 0"
+
+	local kills = 0
+
+	-- Track kills on target player's character death
+	local function onCharacterAdded(char)
+		local humanoid = char:WaitForChild("Humanoid", 10)
+		if humanoid then
+			humanoid.Died:Connect(function()
+				-- Check if LocalPlayer currently has a tool (as a proxy for kill)
+				local killerTool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
+				if killerTool then
+					kills = kills + 1
+					killLabel.Text = "Kills: " .. kills
+				end
+			end)
+		end
+	end
+
+	if targetPlayer.Character then
+		onCharacterAdded(targetPlayer.Character)
+	end
+	targetPlayer.CharacterAdded:Connect(onCharacterAdded)
+
 	button.MouseButton1Click:Connect(function()
 		local name = targetPlayer.Name
 		loopList[name] = not loopList[name]
@@ -230,12 +295,10 @@ local function addPlayerButton(targetPlayer)
 	end)
 end
 
-for _, p in ipairs(Players:GetPlayers()) do addPlayerButton(p) end
+for _, p in ipairs(Players:GetPlayers()) do
+	addPlayerButton(p)
+end
 Players.PlayerAdded:Connect(addPlayerButton)
-
-Players.PlayerRemoving:Connect(function(player)
-	-- Do nothing to keep loopList data intact
-end)
 
 -- LOOPBRING EXECUTION
 task.spawn(function()
@@ -249,22 +312,21 @@ task.spawn(function()
 						local hrp = target.Character:FindFirstChild("HumanoidRootPart")
 						if hrp then
 							setNoClip(target.Character, true)
-							hrp.Velocity = Vector3.zero
-							hrp.RotVelocity = Vector3.zero
-
+							hrp.Velocity = Vector3.new(0, 0, 0)
+							hrp.RotVelocity = Vector3.new(0, 0, 0)
 							local offset
 							if frontLoopMode then
-								offset = myHRP.CFrame.LookVector * 3
+								offset = myHRP.CFrame.LookVector * 3 + Vector3.new(0, 1, 0)
 							else
-								offset = myHRP.CFrame.RightVector * 3 + myHRP.CFrame.LookVector
+								offset = myHRP.CFrame.RightVector * 3 + myHRP.CFrame.LookVector + Vector3.new(0, 1, 0)
 							end
-
-							hrp.CFrame = myHRP.CFrame + offset + Vector3.new(0, 1, 0)
+							hrp.CFrame = myHRP.CFrame + offset
 						end
 					end
 				end
 			end
 		end
-		task.wait(0.08)
+		autoUseTools()
+		task.wait(0)
 	end
 end)
